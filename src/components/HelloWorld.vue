@@ -18,6 +18,8 @@
                 (option.decisionCount / test.totalOptionsDecisions * 100
               - option.weight).toFixed(1)}}%)</span>
               <span> | Displays: {{ option.displayCount }}</span>
+              <span> | Conversions: {{ option.conversionCount }}
+                ({{ (option.conversionCount / option.decisionCount * 100).toFixed(2)}}%)</span>
             </div>
           </div>
         </div>
@@ -46,6 +48,7 @@ export default {
           weight
           decisionCount
           displayCount
+          conversionCount
           label
         }
       }
