@@ -11,10 +11,13 @@
             <div>{{ option.label }}</div>
             <div class="decisionCount">
               <span>{{ option.decisionCount }}</span>
-              <span :style="{color: (option.decisionCount / test.totalOptionsDecisions * 100
-              < option.weight) ? 'red' : 'green' }" v-if="option.decisionCount > 0">({{
+              <span :style="{color: ((option.decisionCount / test.totalOptionsDecisions * 100
+              - option.weight) < 3 && (option.decisionCount / test.totalOptionsDecisions * 100
+              - option.weight) > -3 ) ? 'green' : 'red' }"
+                    v-if="option.decisionCount > 0">({{
                 (option.decisionCount / test.totalOptionsDecisions * 100
               - option.weight).toFixed(1)}}%)</span>
+              <span> | Displays: {{ option.displayCount }}</span>
             </div>
           </div>
         </div>
@@ -42,6 +45,7 @@ export default {
         options {
           weight
           decisionCount
+          displayCount
           label
         }
       }
