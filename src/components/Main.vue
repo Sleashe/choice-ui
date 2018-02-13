@@ -161,23 +161,31 @@ export default {
             background-image linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color white
             border-radius 5px
+            .label-overlay
+              display block
             &>div:first-child, .label-overlay
               border 1px solid white
           &.elected-option
             background-image linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
             color white
             border-radius 5px
+            .label-overlay
+              display block
             &>div:first-child, .label-overlay
               border 1px solid white
+            .label-overlay
+              display block
           &.best-option.elected-option
             background-image: linear-gradient(120deg, #FF4E50 0%, #F9D423 100%);
+            .label-overlay
+              display block
           &>div:first-child
-            cursor pointer
             border 1px solid grey
             margin 5px
             border-radius 25px
             padding 5px
           .label-overlay
+            transition 0.1s
             position absolute
             bottom 0
             transform translate(-50%, -50%)
@@ -189,6 +197,7 @@ export default {
             width 60px
             padding 5px
             margin-top 10px
+            display none
             cursor pointer
             &:before
               content 'Elect'
@@ -197,6 +206,9 @@ export default {
             &:hover
               background-color rgba(0,0,0,0.3)
               color white
+          &:hover
+            .label-overlay
+              display block
           .statistics
             margin-bottom 40px
             span
