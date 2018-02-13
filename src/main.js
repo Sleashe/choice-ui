@@ -9,7 +9,7 @@ import store from './store';
 
 const httpLink = new HttpLink({
   // You should use an absolute URL here
-  uri: 'http://localhost:4000/choice',
+  uri: 'http://localhost/choice',
 });
 
 // Create the apollo client

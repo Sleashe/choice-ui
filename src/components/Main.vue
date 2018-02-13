@@ -12,9 +12,9 @@
                'elected-option': option.elected}">
             <div>{{ option.label }}</div>
             <div class="option-headline" v-if="bestOption(option, test) && !option.elected">
-              Best Option</div>
+              Best </div>
             <div class="option-headline" v-if="option.elected && !bestOption(option, test)">
-              Elected Option</div>
+              Elected </div>
             <div class="option-headline" v-if="option.elected && bestOption(option, test)">
               Elected & Best</div>
             <div class="statistics">
@@ -58,7 +58,7 @@ export default {
           max = o.conversionCount / o.decisionCount;
         }
       });
-      return (max === option.conversionCount / option.decisionCount);
+      return (max > 0 && max === option.conversionCount / option.decisionCount);
     },
     toggleElectOption(testId, optionId) {
       // Call to the graphql mutation
@@ -132,7 +132,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="stylus" scoped>
+<style lang="stylus" rel="stylesheet/stylus" scoped>
   .tests
     font-size 20px
     &>div
@@ -146,17 +146,19 @@ export default {
         justify-content center
         font-size 15px
         .label
+          min-width 80
           position relative
           margin-left 5px
           margin-right 5px
           padding 15px
           .option-headline
-            height 0px
+            height 0
             position relative
             top -75px
             text-transform uppercase
-            font-size 11px
+            font-size 12px
             color grey
+            font-weight 500
           &.best-option
             background-image linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color white
@@ -202,7 +204,7 @@ export default {
             &:before
               content 'Elect'
             &.elected:before
-             content 'Deny'
+              content 'Deny'
             &:hover
               background-color rgba(0,0,0,0.3)
               color white
