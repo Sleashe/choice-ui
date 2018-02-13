@@ -8,10 +8,15 @@
         <div class="options">
           <div v-for="option in test.options" :key="option.id" class="label"
                :style="{width: option.weight + '%' }"
-               :class="{'best-option': bestOption(option, test)}"
-               @mouseenter="displayActions(option)">
+               :class="{'best-option': bestOption(option, test),
+               'elected-option': option.elected}">
             <div>{{ option.label }}</div>
-            <div class="best-option-headline" v-if="bestOption(option, test)">Best Option</div>
+            <div class="option-headline" v-if="bestOption(option, test) && !option.elected">
+              Best Option</div>
+            <div class="option-headline" v-if="option.elected && !bestOption(option, test)">
+              Elected Option</div>
+            <div class="option-headline" v-if="option.elected && bestOption(option, test)">
+              Elected & Best</div>
             <div class="statistics">
               <span>Decisions: {{ option.decisionCount }}</span>
               <span :style="{color: ((option.decisionCount / test.totalOptionsDecisions * 100
@@ -27,7 +32,8 @@
                 Conversions: {{ option.conversionCount }}
                 ({{ (option.conversionCount / option.decisionCount * 100).toFixed(2)}}%)</span>
               <span v-if="!option.conversionCount"> Conversions: 0</span>
-              <div class="label-overlay"></div>
+              <div class="label-overlay" :class="{'elected': option.elected}"
+                   @click="toggleElectOption(test.id, option.id)"></div>
             </div>
           </div>
         </div>
@@ -43,30 +49,75 @@ export default {
   name: 'Main',
   data: () => ({
     tests: [],
-    colors: ['#1abc9c', '#2ecc71', '#3498db', '#9b59b6'],
-    optionActionsDisplay: {},
   }),
   methods: {
     bestOption: (option, test) => {
-      let max = test.options[0].conversionCount || 0;
+      let max = (test.options[0].conversionCount || 0) / test.options[0].decisionCount;
       test.options.forEach((o) => {
-        if (o.conversionCount > max) {
-          max = o.conversionCount;
+        if (o.conversionCount / o.decisionCount > max) {
+          max = o.conversionCount / o.decisionCount;
         }
       });
-      return (max === option.conversionCount);
+      return (max === option.conversionCount / option.decisionCount);
     },
-    displayActions(option) {
-      console.log(this.optionActionsDisplay);
-      this.optionActionsDisplay[option.id] = true;
+    toggleElectOption(testId, optionId) {
+      // Call to the graphql mutation
+      this.$apollo.mutate({
+        // Query
+        mutation: gql`mutation ($testId: String!, $optionId: String!) {
+          toggleElectOption(testId: $testId, optionId: $optionId) {
+            id,
+            name,
+            options {
+              id,
+              elected
+            }
+          }
+        }`,
+
+        update: (store) => {
+          const TESTS_ALL = gql`{
+            tests{
+              id
+              name
+              totalOptionsDecisions
+              options {
+                elected
+                id
+                weight
+                decisionCount
+                displayCount
+                conversionCount
+                label
+              }
+            }
+          }`;
+          const data = store.readQuery({ query: TESTS_ALL });
+          store.writeQuery({ query: TESTS_ALL, data });
+        },
+
+        // Parameters
+        variables: {
+          testId,
+          optionId,
+        },
+      }).then((data) => {
+        // Result
+        console.log(data);
+      }).catch((error) => {
+        // Error
+        console.error(error);
+      });
     },
   },
   apollo: {
     tests: gql`{
       tests{
+        id
         name
         totalOptionsDecisions
         options {
+          elected
           id
           weight
           decisionCount
@@ -87,50 +138,67 @@ export default {
     &>div
       margin-top 30px
       .options
+        display flex
+        height 100%
         padding-top 25px
         margin auto
-        width 50%
+        width 70%
         justify-content center
         font-size 15px
-        display flex
-        transition 0.3s
         .label
-          height 100%
-          transition 0.3s
+          position relative
+          margin-left 5px
+          margin-right 5px
           padding 15px
+          .option-headline
+            height 0px
+            position relative
+            top -75px
+            text-transform uppercase
+            font-size 11px
+            color grey
           &.best-option
-            background-color: rgba(0,255,0,0.17);
+            background-image linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color white
             border-radius 5px
-            transition 0.3s
-            .best-option-headline
-              position relative
-              top -75px
-              text-transform uppercase
-              font-size 11px
+            &>div:first-child, .label-overlay
+              border 1px solid white
+          &.elected-option
+            background-image linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+            color white
+            border-radius 5px
+            &>div:first-child, .label-overlay
+              border 1px solid white
+          &.best-option.elected-option
+            background-image: linear-gradient(120deg, #FF4E50 0%, #F9D423 100%);
           &>div:first-child
             cursor pointer
-            transition 0.2s
             border 1px solid grey
             margin 5px
             border-radius 25px
             padding 5px
-          &:hover
-            .label-overlay
-              transition 0.15s
-              margin auto
-              border 1px solid grey
-              border-radius 25px
-              font-size 12px
-              width 60px
-              padding 5px
-              margin-top 10px
-              cursor pointer
-              &:before
-                content 'Elect'
-              &:hover
-                background-color rgba(0,0,0,0.3)
-                color white
+          .label-overlay
+            position absolute
+            bottom 0
+            transform translate(-50%, -50%)
+            left 50%
+            margin auto
+            border 1px solid grey
+            border-radius 25px
+            font-size 12px
+            width 60px
+            padding 5px
+            margin-top 10px
+            cursor pointer
+            &:before
+              content 'Elect'
+            &.elected:before
+             content 'Deny'
+            &:hover
+              background-color rgba(0,0,0,0.3)
+              color white
           .statistics
+            margin-bottom 40px
             span
               font-size 12px
 </style>
