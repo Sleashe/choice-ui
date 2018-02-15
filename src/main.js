@@ -9,7 +9,7 @@ import store from './store';
 
 const httpLink = new HttpLink({
   // You should use an absolute URL here
-  uri: 'http://localhost/choice',
+  uri: process.env.VUE_APP_CHOICE_URL,
 });
 
 // Create the apollo client
